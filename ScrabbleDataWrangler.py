@@ -12,7 +12,7 @@ class TurnCreator:
         self.fgames_collection = scrabble_db["fgames_collection"]    
 
     def fill_turn_table(self):
-       conn = pg2.connect(user='postgres',  dbname='scrabble', host='localhost', port='5432', password='myPassword')
+       conn = pg2.connect(user='postgres',  dbname='scrabble', host='localhost', port='5432', password='')
        for g in self.fgames_collection.find():  #{'game_num': {'$lt':'27366'}}):
         #    if (int(g['game_num']) > 15900):
         #        continue
