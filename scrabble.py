@@ -10,7 +10,6 @@ class CrossTablesDownloader:
         client = MongoClient("mongodb://localhost:27017/")
         self._scrabble_db = client[ "scrabble" ]
         self._pages_collection = self._scrabble_db[ "pages_collection" ]
-        self._games_collection = self._scrabble_db[ "games_collection" ]
         self._fgames_collection = self._scrabble_db[ "fgames_collection"]
 
     def get_player_name_and_id(self,link):
@@ -48,6 +47,8 @@ class CrossTablesDownloader:
         return p1_name, p1_id, p2_name, p2_id
 
     def get_game_info(self, game):
+        p1_id = p2_id = "-1"
+        p1_name = p2_name = ""
         gameid = game.find('a')['href'].split("u=")[1]
         lexicon = game.find_all('td', "tdc nobr")[1].text
         players = game.next_element.next_element.next_element.next_element.next_element
@@ -56,64 +57,77 @@ class CrossTablesDownloader:
         else:
             lexicon = "     "
         player_links = players.find_all('a')
-        return gameid, lexicon, players, player_links
+        if player_links:
+            p1_name, p1_id, p2_name, p2_id = self.get_linked_player_names(player_links, players)
+        else:
+            p1_name, p2_name = self.get_non_linked_player_names(players.next_element)
+        
+        return gameid, lexicon, p1_id, p1_name, p2_id, p2_name
 
+
+
+    def add_game_to_collection(self, gameid, lexicon, p1_id, p1_name, p2_id, p2_name):
+        if (self._fgames_collection.find({'game_num': gameid}).count() != 0):
+            return False
+        else:
+            with open("download.log", "w+") as logf:
+                print ("     GameID: {:}   Lexicon: {:}   P1:({:},{:}) P2:({:},{:})".format(gameid, lexicon, p1_name, p1_id, p2_name, p2_id))
+                    
+                try:
+                        url = "https://www.cross-tables.com/annotated.php?u=" + gameid
+                        r = requests.get(url, headers={"User-Agent": "XY"})
+                        if (r.status_code==200):
+                            self._fgames_collection.insert_one({"game_num": gameid, "lexicon": lexicon, "p1_name": p1_name, "p1_id": p1_id, "p2_name": p2_name, "p2_id": p2_id, "content": r.text})
+                        else:
+                            print ("error", gameid)
+                        time.sleep(1)
+
+                except Exception as e:     
+                    logf.write("Failed to download {0}\n".format(gameid))
+        return True
+
+    def get_list_of_games_page(self, page_index):
+           url = "https://www.cross-tables.com/annolistself.php?offset=" + str(page_index)
+           r = requests.get(url, headers={"User-Agent": "XY"})
+           print(page_index, r.status_code)
+           if (r.status_code==200):
+               pass
+#                new_pages_collection.insert_one({"page_num": i, "content": r.text})
+           else:
+                print ("error", page_index)
+                return None
+           return r
+    
     def download_games(self):
         c = 0
-        i=1
+        all_games_found = False
+        page_index = 1
+        while not all_games_found:
 #        games_collection = scrabble_db[ "games_collection" ]
-        for p in self._pages_collection.find({'page_num': {"$gt": 0}}):  #({'page_num':15501}):
+#        for p in self._pages_collection.find({'page_num': {"$gt": 0}}):  #({'page_num':15501}):
+ 
+            r = self.get_list_of_games_page(page_index)
+
             print(c)
             c+=1
         #    print(p['content'])
-            page_num = p['page_num']
-            print (page_num)
-            soup = BeautifulSoup(p['content'], 'html.parser')
+  #          page_num = p['page_num']
+  #          print (page_num)
+            soup = BeautifulSoup(r.content, 'html.parser')
             for i in range (1, 101):
                 game = soup.find(id="row"+str(i))
                 if not game:
                     return
-                p1_id = p2_id = "-1"
-                p1_name = p2_name = ""
-                gameid, lexicon, players, player_links = self.get_game_info(game)
 
-                if player_links:
-                    p1_name, p1_id, p2_name, p2_id = self.get_linked_player_names(player_links, players)
-                else:
-                    p1_name, p2_name = self.get_non_linked_player_names(players.next_element)
+                gameid, lexicon, p1_id, p1_name, p2_id, p2_name = self.get_game_info(game)              
+                if not self.add_game_to_collection(gameid, lexicon, p1_id, p1_name, p2_id, p2_name):
+                    return;   
+            page_index +=1
 
-                    
-                # print ("     GameID: {:}   Lexicon: {:}   P1:({:},{:}) P2:({:},{:})".format(gameid, lexicon, p1_name, p1_id, p2_name, p2_id))
-                # if (self._games_collection.find({'game_num': gameid}).count() == 0):
-                #     gamefolder = str(int(gameid)//100)
-                #     url = "https://www.cross-tables.com/annotated/selfgcg/" +str(gamefolder) + "/anno" + gameid + ".gcg"
-                #     r = requests.get(url, headers={"User-Agent": "XY"})
-                #     if (r.status_code==200):
-                #         self._games_collection.insert_one({"game_num": gameid, "content": r.text})
-                #     else:
-                #         print ("error", i)
-                #     time.sleep(3)
-
-                with open("download.log", "w+") as logf:
-                    print ("     GameID: {:}   Lexicon: {:}   P1:({:},{:}) P2:({:},{:})".format(gameid, lexicon, p1_name, p1_id, p2_name, p2_id))
-                    if (self._fgames_collection.find({'game_num': gameid}).count() == 0):
-    #                   gamefolder = str(int(gameid)//100)
-
-                        try:
-                            # code to process download here
-                            url = "https://www.cross-tables.com/annotated.php?u=" + gameid
-                            r = requests.get(url, headers={"User-Agent": "XY"})
-                            if (r.status_code==200):
-                                self._fgames_collection.insert_one({"game_num": gameid, "p1_name": p1_name, "p1_id": p1_id, "p2_name": p2_name, "p2_id": p2_id, "content": r.text})
-                            else:
-                                print ("error", i)
-                            time.sleep(1)
-
-                        except Exception as e:     # most generic exception you can catch
-                            logf.write("Failed to download {0}: {1}\n".format(gameid, page_num))
-                            # optional: delete local version of failed download
+                             
                     
                 
-
-ctd = CrossTablesDownloader()
-ctd.download_games()
+if __name__ == "__main__":
+    ctd = CrossTablesDownloader()
+    ctd.download_games()
+#ctd.add_lexicon()
