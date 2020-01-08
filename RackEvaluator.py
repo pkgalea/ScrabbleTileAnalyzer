@@ -143,7 +143,7 @@ class RackEvaluator:
         axes.set_xlim(left=-10, right=150)
      #   axes.set_ylim(bottom=0, top =.1)
      #   print(" ")
-        return axes, report  
+        return control["turn_score"], test["turn_score"], report  
 
 if __name__ == "__main__":
     re = RackEvaluator([TileCondition('A', 1, "<")])

@@ -1,7 +1,12 @@
 <html>
     <head>
         <title>{{title}}</title>
+        {{ js_resources|indent(4)|safe }}
+        {{ css_resources|indent(4)|safe }}
+        {{ plot_script|indent(4)|safe }}
     </head>
+
+    
     <body>
         <h1>Hello!</h1>
 
@@ -39,5 +44,6 @@
             <BR>
             {{report | safe}}
         </form>
+        {{ plot_div|indent(4)|safe }}
     </body>
 </html>
