@@ -34,7 +34,7 @@ class TurnCreator:
                 is_vertical = int(item_split[4])
                 score = int(item_split[5])
                 rack = item_split[6].replace('\x00', '')[2:-1]
-                is_player2 = item_split[7].replace('\x00', '')
+                is_player2 = bool(item_split[7].replace('\x00', '').strip())
                 p1_score = int(item_split[8])
                 p2_score = int(item_split[9])
                 comment = ",".join(item_split[10:]).split(']')[0][3:].replace('\x00', '')   #[3:-7]
