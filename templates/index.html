@@ -1,0 +1,43 @@
+<html>
+    <head>
+        <title>{{title}}</title>
+    </head>
+    <body>
+        <h1>Hello!</h1>
+
+        <form action="{{ url_for('results') }}" method="post">
+            Compare a rack with 
+
+            <select name="DDCompare" width="300px">
+                {% for c in compares %}
+                    <option value="{{ c[1] }}">{{ c[0] }}
+                    </option>
+                {% endfor %}
+            </select>
+
+            <select name="DDCount">
+                <option value = 0>0</option>
+                <option value = 1>1</option>
+                <option value = 2>2</option>
+                <option value = 3>3</option>
+                <option value = 4>4</option>
+                <option value = 5>5</option>
+                <option value = 6>6</option>
+                <option value = 7>7</option>
+            </select>
+
+            <select name="DDLetter" width="300px">
+                {% for l in alphabet %}
+                    <option value="{{ l }}">{{ l }}</option>
+                {% endfor %}
+            </select>
+            <BR>
+            <BR>
+                    <input class="button1" type="submit" value="GO!">
+
+            <BR>
+            <BR>
+            {{report | safe}}
+        </form>
+    </body>
+</html>

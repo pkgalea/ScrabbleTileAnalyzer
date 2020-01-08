@@ -98,6 +98,7 @@ class RackEvaluator:
             report = "There is not enough data"
             return None, report
         
+        print ()
         control_label = self._control_conditions[0].get_label()
         test_label = self._test_conditions[0].get_label()
 
@@ -105,18 +106,19 @@ class RackEvaluator:
         test_y_bar = round(np.mean(test["turn_score"]), 2)
         control_n = control.shape[0]
         test_n = test.shape[0]
-        report += "mean scores with {:}: {:}, (n={:})\n".format(self._control_conditions[0].get_label(), round(np.mean(control["turn_score"]), 2), 
+        report += "Results:\n"
+        report += "     mean scores with {:}: {:}, (n={:})\n".format(self._control_conditions[0].get_label(), round(np.mean(control["turn_score"]), 2), 
                                                 control_n)
-        report += "mean score with {:}: {:}, (n={:})\n".format(self._test_conditions[0].get_label(), round(np.mean(test["turn_score"]), 2), 
+        report += "     mean score with {:}: {:}, (n={:})\n".format(self._test_conditions[0].get_label(), round(np.mean(test["turn_score"]), 2), 
                                                 test_n)
 
-        report += "Test for equality:\n"
+        report += "Test for equality of means:\n"
         p_value = stats.ttest_ind(control.turn_score, test.turn_score, equal_var=False).pvalue
         if p_value < 0.05:
-            "We reject the hypothesis that the two distributions are equal."
+            report += "     We reject the hypothesis that the two distributions are equal."
         else:
-            "We do not have enough evidence to reject the hypothesis that the two distributions are equal."
-        report += " (p-value: {:}\n\n".format(p_value) 
+            report += "     We do not have enough evidence to reject the hypothesis that the two distributions are equal."
+        report += "     (p-value: {:})\n\n".format(p_value) 
         control_var = np.var(control["turn_score"])
         test_var = np.var(test["turn_score"])
         mean_diff = test_y_bar - control_y_bar
@@ -126,14 +128,15 @@ class RackEvaluator:
  
         MoE = stats.norm.ppf(0.975) * std_err 
 
+        report += "Measure of effect:\n"
         report += "I can say with 95% confidence that a rack with {:} will score between [{:}, {:}] points than a rack with {:}".format(test_label, mean_diff - MoE, mean_diff + MoE, control_label)
 
     #    m = Matcher(control, test, yvar="turn_score", exclude=["rack"])
     #   print(control.shape, test.shape)
     #    print (np.mean(control['rating']))
     #    print (np.mean(test['rating']))
-        axes.hist(control["turn_score"], bins=300, density=True, alpha = .5, color='blue', edgecolor='black', linewidth=1.2, label=self._control_conditions[0].get_label())
-        axes.hist(test["turn_score"], bins=300, density=True, alpha=.5, edgecolor='black', linewidth=1.2, label=self._test_conditions[0].get_label(), color="green")
+        axes.hist(control["turn_score"], bins=control["turn_score"].nunique(),  density=True, alpha = .5, color='blue', edgecolor='black', linewidth=1.2, label=self._control_conditions[0].get_label())
+        axes.hist(test["turn_score"], bins=test["turn_score"].nunique(), density=True, alpha=.5, edgecolor='black', linewidth=1.2, label=self._test_conditions[0].get_label(), color="green")
         axes.axvline(control_y_bar, color="blue")
         axes.axvline(test_y_bar, color="green")
         axes.legend()
