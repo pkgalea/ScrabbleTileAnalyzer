@@ -6,40 +6,13 @@ from bokeh.embed import components
 from bokeh.plotting import figure
 from bokeh.resources import INLINE
 from bokeh.util.string import encode_utf8
+from bokeh.models import Span
+
 
 import numpy as np
 
 app = Flask(__name__)
 
-
-@app.route('/bokeh')
-def bokeh():
-
-    # init a basic bar chart:
-    # http://bokeh.pydata.org/en/latest/docs/user_guide/plotting.html#bars
-    fig = figure(plot_width=600, plot_height=800)
-    fig.vbar(
-        x=[1, 2, 3, 4],
-        width=0.5,
-        bottom=0,
-        top=[1.7, 2.2, 4.6, 3.9],
-        color='navy'
-    )
-
-    # grab the static resources
-    js_resources = INLINE.render_js()
-    css_resources = INLINE.render_css()
-
-    # render template
-    script, div = components(fig)
-    html = render_template(
-        'index.html',
-        plot_script=script,
-        plot_div=div,
-        js_resources=js_resources,
-        css_resources=css_resources,
-    )
-    return encode_utf8(html)
 
 @app.route('/')
 def hello(title=None, report="", control=[1], test=[1]):
@@ -51,7 +24,12 @@ def hello(title=None, report="", control=[1], test=[1]):
            fill_color="navy", line_color="white", alpha=0.5)
     fig.quad(top=test_hist, bottom=0, left=test_edges[:-1], right=test_edges[1:],
         fill_color="red", line_color="white", alpha=0.5)
-     
+    fig.xaxis.axis_label = 'x'
+    fig.yaxis.axis_label = 'Pr(x)' 
+    vline = Span(location=30, dimension='height', line_color='red', line_width=3)
+
+    fig.renderers.extend([vline])
+
      
     # grab the static resources
     js_resources = INLINE.render_js()

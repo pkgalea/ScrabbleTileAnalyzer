@@ -1,6 +1,6 @@
 <html>
     <head>
-        <title>{{title}}</title>
+        <title>Scrabble Rack Comparer</title>
         {{ js_resources|indent(4)|safe }}
         {{ css_resources|indent(4)|safe }}
         {{ plot_script|indent(4)|safe }}
@@ -8,7 +8,7 @@
 
     
     <body>
-        <h1>Hello!</h1>
+        <h1>Scrabble Rack Compare</h1>
 
         <form action="{{ url_for('results') }}" method="post">
             Compare a rack with 
@@ -35,7 +35,7 @@
                 {% for l in alphabet %}
                     <option value="{{ l }}">{{ l }}</option>
                 {% endfor %}
-            </select>
+            </select>'s
             <BR>
             <BR>
                     <input class="button1" type="submit" value="GO!">
