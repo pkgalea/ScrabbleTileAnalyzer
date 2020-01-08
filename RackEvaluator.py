@@ -4,6 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy import stats
+import math
 
 plt.style.use('ggplot')
 
@@ -93,20 +94,40 @@ class RackEvaluator:
             self._test_conditions = [self._control_conditions[0].get_opposite()]
         control, test = self.get_data()
         report = ""
-        if (control.shape[0]):
-            control_y_bar = round(np.mean(control["turn_score"]), 2)
-            test_y_bar = round(np.mean(test["turn_score"]), 2)
-            control_n = control.shape[0]
-            test_n = test.shape[0]
-            report += "mean scores with {:}: {:}, ({:})\n".format(self._control_conditions[0].get_label(), round(np.mean(control["turn_score"]), 2), 
-                                                    control_n)
-            report += "mean score with {:}: {:}, ({:})\n".format(self._test_conditions[0].get_label(), round(np.mean(test["turn_score"]), 2), 
-                                                    test_n)
+        if not control.shape[0] or not test.shape[0]:
+            report = "There is not enough data"
+            return None, report
+        
+        control_label = self._control_conditions[0].get_label()
+        test_label = self._test_conditions[0].get_label()
 
+        control_y_bar = round(np.mean(control["turn_score"]), 2)
+        test_y_bar = round(np.mean(test["turn_score"]), 2)
+        control_n = control.shape[0]
+        test_n = test.shape[0]
+        report += "mean scores with {:}: {:}, (n={:})\n".format(self._control_conditions[0].get_label(), round(np.mean(control["turn_score"]), 2), 
+                                                control_n)
+        report += "mean score with {:}: {:}, (n={:})\n".format(self._test_conditions[0].get_label(), round(np.mean(test["turn_score"]), 2), 
+                                                test_n)
 
-            report += "Score p-value: %3f" % stats.ttest_ind(control.turn_score, test.turn_score, equal_var=False).pvalue
-        control_std_err = np.std(control["turn_score"])/len(n)
-        test_std_err = np.std(test["turn_score"])/len()
+        report += "Test for equality:\n"
+        p_value = stats.ttest_ind(control.turn_score, test.turn_score, equal_var=False).pvalue
+        if p_value < 0.05:
+            "We reject the hypothesis that the two distributions are equal."
+        else:
+            "We do not have enough evidence to reject the hypothesis that the two distributions are equal."
+        report += " (p-value: {:}\n\n".format(p_value) 
+        control_var = np.var(control["turn_score"])
+        test_var = np.var(test["turn_score"])
+        mean_diff = test_y_bar - control_y_bar
+        df=control_n + test_n - 2
+        pooled_std_dev = math.sqrt( ((control_n-1)*control_var + (test_n-1)*test_var)/df)
+        std_err = pooled_std_dev * math.sqrt(1/control_n + 1/test_n)
+ 
+        MoE = stats.norm.ppf(0.975) * std_err 
+
+        report += "I can say with 95% confidence that a rack with {:} will score between [{:}, {:}] points than a rack with {:}".format(test_label, mean_diff - MoE, mean_diff + MoE, control_label)
+
     #    m = Matcher(control, test, yvar="turn_score", exclude=["rack"])
     #   print(control.shape, test.shape)
     #    print (np.mean(control['rating']))
