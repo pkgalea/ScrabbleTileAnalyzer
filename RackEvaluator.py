@@ -64,6 +64,18 @@ class RackEvaluator:
     def __init__(self, control_conditions, test_conditions=None):
         self._control_conditions = control_conditions
         self._test_conditions = test_conditions
+        self.control_y = None
+        self.test_y = None
+        self.control_label = None
+        self.test_label = None
+        self.control_n = None
+        self.test_n = None
+        self.control_y_bar = None
+        self.test_y_bar = None
+        self.ci_lower = None
+        self.ci_upper = None
+        self.mean_diff = None
+        self.p_value = None
     
 
     def get_data(self):
@@ -89,7 +101,7 @@ class RackEvaluator:
 
 
     def evaluate(self):
-        fig, axes = plt.subplots(1, 1, figsize=(20, 5))
+
         if not self._test_conditions:
             self._test_conditions = [self._control_conditions[0].get_opposite()]
         control, test = self.get_data()
@@ -97,53 +109,45 @@ class RackEvaluator:
         if not control.shape[0] or not test.shape[0]:
             report = "There is not enough data"
             return None, report
-        
-        print ()
-        control_label = self._control_conditions[0].get_label()
-        test_label = self._test_conditions[0].get_label()
+        self.control_y = control["turn_score"]
+        self.test_y = test["turn_score"]
 
-        control_y_bar = round(np.mean(control["turn_score"]), 2)
-        test_y_bar = round(np.mean(test["turn_score"]), 2)
-        control_n = control.shape[0]
-        test_n = test.shape[0]
+        self.control_label = self._control_conditions[0].get_label()
+        self.test_label = self._test_conditions[0].get_label()
+
+        self.control_y_bar = round(np.mean(control["turn_score"]), 2)
+        self.test_y_bar = round(np.mean(test["turn_score"]), 2)
+        self.control_n = control.shape[0]
+        self.test_n = test.shape[0]
         report += "Results:\n"
-        report += "     mean scores with {:}: {:}, (n={:})\n".format(self._control_conditions[0].get_label(), round(np.mean(control["turn_score"]), 2), 
-                                                control_n)
-        report += "     mean score with {:}: {:}, (n={:})\n".format(self._test_conditions[0].get_label(), round(np.mean(test["turn_score"]), 2), 
-                                                test_n)
+#        report += "     mean scores with {:}: {:}, (n={:})\n".format(self._control_conditions[0].get_label(), round(self.control_y_bar), 2), self.control_n)
+#        report += "     mean score with {:}: {:}, (n={:})\n".format(self._test_conditions[0].get_label(), round(self.test_y_bar), 2), 
+#                                                self.test_n)
 
-        report += "Test for equality of means:\n"
-        p_value = stats.ttest_ind(control.turn_score, test.turn_score, equal_var=False).pvalue
-        if p_value < 0.05:
-            report += "     We reject the hypothesis that the two distributions are equal."
-        else:
-            report += "     We do not have enough evidence to reject the hypothesis that the two distributions are equal."
-        report += "     (p-value: {:})\n\n".format(p_value) 
+#        report += "Test for equality of means:\n"
+        self.p_value = stats.ttest_ind(control.turn_score, test.turn_score, equal_var=False).pvalue
+#        if self.p_value < 0.05:
+#            report += "     We reject the hypothesis that the two distributions are equal."
+#        else:
+#            report += "     We do not have enough evidence to reject the hypothesis that the two distributions are equal."
+#        report += "     (p-value: {:})\n\n".format(self.p_value) 
         control_var = np.var(control["turn_score"])
         test_var = np.var(test["turn_score"])
-        mean_diff = test_y_bar - control_y_bar
-        df=control_n + test_n - 2
-        pooled_std_dev = math.sqrt( ((control_n-1)*control_var + (test_n-1)*test_var)/df)
-        std_err = pooled_std_dev * math.sqrt(1/control_n + 1/test_n)
+        self.mean_diff = self.test_y_bar - self.control_y_bar
+        df=self.control_n + self.test_n - 2
+        pooled_std_dev = math.sqrt( ((self.control_n-1)*control_var + (self.test_n-1)*test_var)/df)
+        std_err = pooled_std_dev * math.sqrt(1/self.control_n + 1/self.test_n)
  
         MoE = stats.norm.ppf(0.975) * std_err 
+        self.ci_lower = self.mean_diff - MoE
+        self.ci_upper = self.mean_diff + MoE
 
         report += "Measure of effect:\n"
-        report += "I can say with 95% confidence that a rack with {:} will score between [{:}, {:}] points than a rack with {:}".format(test_label, mean_diff - MoE, mean_diff + MoE, control_label)
+ #       report += "I can say with 95% confidence that a rack with {:} will score between [{:}, {:}] points than a rack with {:}".format(self.test_label, self.mean_diff - MoE, self.mean_diff + MoE, control_label)
 
-    #    m = Matcher(control, test, yvar="turn_score", exclude=["rack"])
-    #   print(control.shape, test.shape)
-    #    print (np.mean(control['rating']))
-    #    print (np.mean(test['rating']))
-        axes.hist(control["turn_score"], bins=control["turn_score"].nunique(),  density=True, alpha = .5, color='blue', edgecolor='black', linewidth=1.2, label=self._control_conditions[0].get_label())
-        axes.hist(test["turn_score"], bins=test["turn_score"].nunique(), density=True, alpha=.5, edgecolor='black', linewidth=1.2, label=self._test_conditions[0].get_label(), color="green")
-        axes.axvline(control_y_bar, color="blue")
-        axes.axvline(test_y_bar, color="green")
-        axes.legend()
-        axes.set_xlim(left=-10, right=150)
-     #   axes.set_ylim(bottom=0, top =.1)
-     #   print(" ")
-        return control["turn_score"], test["turn_score"], report  
+
+
+        return True  
 
 if __name__ == "__main__":
     re = RackEvaluator([TileCondition('A', 1, "<")])

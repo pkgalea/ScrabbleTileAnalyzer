@@ -1,9 +1,11 @@
 <html>
     <head>
         <title>Scrabble Rack Comparer</title>
-        {{ js_resources|indent(4)|safe }}
-        {{ css_resources|indent(4)|safe }}
-        {{ plot_script|indent(4)|safe }}
+        {% if has_data %}
+            {{ js_resources|indent(4)|safe }}
+            {{ css_resources|indent(4)|safe }}
+            {{ plot_script|indent(4)|safe }}
+        {% endif %}
     </head>
 
     
@@ -42,8 +44,34 @@
 
             <BR>
             <BR>
-            {{report | safe}}
+            {% if has_data %}
+                <h2> Data: </h2>
+                    <table>
+
+                   <tr><td>&nbsp;</td><td> <B><Control Group: {{control_label | safe}}</B></td><td> <B><Test Group: {{test_label | safe}}</B></td></tr>
+                   <tr><td>Sample size:</td><td>{{control_n}}</td><td> {{test_n}} </td></tr>
+                   <tr><td>Sample mean:</td><td>{{control_y_bar}}</td><td> {{test_y_bar}} </td></tr>
+                   </table>
+                       
+                    <br>
+                <BR>
+                <h2>Statistical Inference:</h2>
+                Because our sample size is so large, we invoke the central limit theorem and use a two sample z-test to compare means.<BR>
+                H0 = The mean of the two populations is the same.<BR>
+                H1 = The mean of the two populations is not the same.<BR>
+
+                {% if p_value < 0.05 %}
+                    We reject the null hypothesis that the mean score of these groups is the same.
+                {% else %}
+                    We cannot reject the hypothesis that the mean score of these groups is the same.
+                {% endif %}
+                <BR>
+                p value: {{ p_value }}<BR>
+                We can say with 95% confidence that the true mean effect of having {{test_label}} over {{control_label}} on your rack is <h3>[{{ci_lower}}, {{ci_upper}}]</h3> more points.
+                 {{ plot_div|indent(4)|safe }}
+            {% endif %}
         </form>
-        {{ plot_div|indent(4)|safe }}
+
+
     </body>
 </html>
