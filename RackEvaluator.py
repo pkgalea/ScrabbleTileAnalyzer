@@ -17,10 +17,6 @@ class TileCondition:
     def get_lambda(self):
         if (self._compare=="=="):
             return lambda x: x.count(self._letter)== self._count
-        if (self._compare=="<"):
-            return lambda x: x.count(self._letter) < self._count
-        if (self._compare==">"):
-            return lambda x: x.count(self._letter) > self._count
         if (self._compare==">="):
             return lambda x: x.count(self._letter) >= self._count
         if (self._compare=="<="):
@@ -31,10 +27,6 @@ class TileCondition:
     def get_label(self):
         if (self._compare=="=="):
             return "Exactly {:} {:}'s".format(self._count, self._letter)
-        if (self._compare=="<"):
-            return "Less than {:} {:}'s".format(self._count, self._letter)
-        if (self._compare==">"):
-            return "More than {:} {:}'s".format(self._count, self._letter)
         if (self._compare=="<="):
             return "{:} or less {:}'s".format(self._count, self._letter)
         if (self._compare==">="):
@@ -42,21 +34,6 @@ class TileCondition:
         if (self._compare=="!="):
             return "Does not have {:} {:}'s".format(self._count, self._letter)
     
-    def get_opposite(self):
-        if (self._compare=="=="):
-            cond = "!="
-        if (self._compare=="<"):
-            cond= ">="
-        if (self._compare==">"):
-            cond="<="
-        if (self._compare=="<="):
-            cond=">"
-        if (self._compare==">="):
-            cond= "<"
-        if (self._compare=="!="):
-            cond = "=="
-        return TileCondition(self._letter, self._count, cond)
-
 
 
 
@@ -77,6 +54,7 @@ class RackEvaluator:
         self.mean_diff = None
         self.p_value = None
     
+
 
     def get_data(self):
         conn = pg2.connect(user='postgres',  dbname='scrabble', host='localhost', port='5432', password='myPassword')
@@ -102,8 +80,6 @@ class RackEvaluator:
 
     def evaluate(self):
 
-        if not self._test_conditions:
-            self._test_conditions = [self._control_conditions[0].get_opposite()]
         control, test = self.get_data()
         report = ""
         if not control.shape[0] or not test.shape[0]:
@@ -119,18 +95,8 @@ class RackEvaluator:
         self.test_y_bar = round(np.mean(test["turn_score"]), 2)
         self.control_n = control.shape[0]
         self.test_n = test.shape[0]
-        report += "Results:\n"
-#        report += "     mean scores with {:}: {:}, (n={:})\n".format(self._control_conditions[0].get_label(), round(self.control_y_bar), 2), self.control_n)
-#        report += "     mean score with {:}: {:}, (n={:})\n".format(self._test_conditions[0].get_label(), round(self.test_y_bar), 2), 
-#                                                self.test_n)
-
-#        report += "Test for equality of means:\n"
         self.p_value = stats.ttest_ind(control.turn_score, test.turn_score, equal_var=False).pvalue
-#        if self.p_value < 0.05:
-#            report += "     We reject the hypothesis that the two distributions are equal."
-#        else:
-#            report += "     We do not have enough evidence to reject the hypothesis that the two distributions are equal."
-#        report += "     (p-value: {:})\n\n".format(self.p_value) 
+
         control_var = np.var(control["turn_score"])
         test_var = np.var(test["turn_score"])
         self.mean_diff = self.test_y_bar - self.control_y_bar
@@ -142,9 +108,7 @@ class RackEvaluator:
         self.ci_lower = self.mean_diff - MoE
         self.ci_upper = self.mean_diff + MoE
 
-        report += "Measure of effect:\n"
- #       report += "I can say with 95% confidence that a rack with {:} will score between [{:}, {:}] points than a rack with {:}".format(self.test_label, self.mean_diff - MoE, self.mean_diff + MoE, control_label)
-
+ 
 
 
         return True  

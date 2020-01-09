@@ -1,74 +1,115 @@
 <html>
     <head>
-        <title>Scrabble Rack Comparer</title>
+        <title>Scrabble Tile Comparison</title>
         {% if has_data %}
             {{ js_resources|indent(4)|safe }}
             {{ css_resources|indent(4)|safe }}
             {{ plot_script|indent(4)|safe }}
         {% endif %}
+ 
     </head>
 
     
     <body>
-        <h1>Scrabble Rack Compare</h1>
+        <h1>Scrabble Tile Comparison</h1>
 
         <form action="{{ url_for('results') }}" method="post">
+            {% if not has_data %}
             Compare a rack with 
 
-            <select name="DDCompare" width="300px">
-                {% for c in compares %}
-                    <option value="{{ c[1] }}">{{ c[0] }}
-                    </option>
-                {% endfor %}
-            </select>
+                <select name="DDCompareC" width="300px">
+                    {% for c in compares %}
+                        <option value="{{ c[1] }}">{{ c[0] }}
+                        </option>
+                    {% endfor %}
+                </select>
 
-            <select name="DDCount">
-                <option value = 0>0</option>
-                <option value = 1>1</option>
-                <option value = 2>2</option>
-                <option value = 3>3</option>
-                <option value = 4>4</option>
-                <option value = 5>5</option>
-                <option value = 6>6</option>
-                <option value = 7>7</option>
-            </select>
+                <select name="DDCountC">
+                    <option value = 0>0</option>
+                    <option value = 1>1</option>
+                    <option value = 2>2</option>
+                    <option value = 3>3</option>
+                    <option value = 4>4</option>
+                    <option value = 5>5</option>
+                    <option value = 6>6</option>
+                    <option value = 7>7</option>
+                </select>
 
-            <select name="DDLetter" width="300px">
-                {% for l in alphabet %}
-                    <option value="{{ l }}">{{ l }}</option>
-                {% endfor %}
-            </select>'s
-            <BR>
-            <BR>
-                    <input class="button1" type="submit" value="GO!">
+                <select name="DDLetterC" width="300px">
+                    {% for l in alphabet %}
+                        <option value="{{ l }}">{{ l }}</option>
+                    {% endfor %}
+                </select>'s
 
+                to a rack with 
+
+                <select name="DDCompareT" width="300px">
+                    {% for c in compares %}
+                        <option value="{{ c[1] }}">{{ c[0] }}
+                        </option>
+                    {% endfor %}
+                </select>
+
+                <select name="DDCountT">
+                    <option value = 0>0</option>
+                    <option value = 1>1</option>
+                    <option value = 2>2</option>
+                    <option value = 3>3</option>
+                    <option value = 4>4</option>
+                    <option value = 5>5</option>
+                    <option value = 6>6</option>
+                    <option value = 7>7</option>
+                </select>
+
+                <select name="DDLetterT" width="300px">
+                    {% for l in alphabet %}
+                        <option value="{{ l }}">{{ l }}</option>
+                    {% endfor %}
+                </select>'s
+                <BR>
+                <BR>
+                        <input class="button1" type="submit" value="GO!">
+            {% else %}
+                <a href="/">Run Another Test</a>
+            {% endif %}
             <BR>
             <BR>
             {% if has_data %}
+                <table width=800><tr><td align=left>
                 <h2> Data: </h2>
-                    <table>
+                </td></tr>
+                <tr><td align=center>
+                    <table border=2>
 
-                   <tr><td>&nbsp;</td><td> <B><Control Group: {{control_label | safe}}</B></td><td> <B><Test Group: {{test_label | safe}}</B></td></tr>
-                   <tr><td>Sample size:</td><td>{{control_n}}</td><td> {{test_n}} </td></tr>
-                   <tr><td>Sample mean:</td><td>{{control_y_bar}}</td><td> {{test_y_bar}} </td></tr>
+                   <tr><td>&nbsp;</td><td align="center"> <B>Control Group<br>{{control_label | safe}}</B></td><td align="center"> <B>Test Group<br>{{test_label | safe}}</B></td align="center"></tr>
+                   <tr><td align="right">Sample size:</td><td align="center">{{control_n}}</td align="center"><td align="center"> {{test_n}} </td align="center"></tr>
+                   <tr><td  align="right">Sample mean:</td><td align="center"><b>{{control_y_bar}}</b></td align="center"><td align="center"><b> {{test_y_bar}}</b> </td align="center"></tr>
                    </table>
-                       
-                    <br>
-                <BR>
-                <h2>Statistical Inference:</h2>
-                Because our sample size is so large, we invoke the central limit theorem and use a two sample z-test to compare means.<BR>
-                H0 = The mean of the two populations is the same.<BR>
-                H1 = The mean of the two populations is not the same.<BR>
+                </td>   </tr>
+            </tr>    
+                <td align=center>{{ plot_div|indent(4)|safe }}</td>
+                </tr></table>
+                <table width=800><tr></td>
+                    <h2>Statistical Inference:</h2></td></tr>
+                    <tr><td width=50>&nbsp;&nbsp;&nbsp;</td w><td>
+                        <h3>Test:</h3>
+                    Because our sample size is so large, we invoke the central limit theorem and use a two sample z-test to compare means.<BR>
+                    H0 = The mean of the two populations is the same.<BR>
+                    H1 = The mean of the two populations is not the same.<BR>
+                    <BR>
+                    <h3>Result:</h3>
 
-                {% if p_value < 0.05 %}
-                    We reject the null hypothesis that the mean score of these groups is the same.
-                {% else %}
-                    We cannot reject the hypothesis that the mean score of these groups is the same.
-                {% endif %}
-                <BR>
-                p value: {{ p_value }}<BR>
-                We can say with 95% confidence that the true mean effect of having {{test_label}} over {{control_label}} on your rack is <h3>[{{ci_lower}}, {{ci_upper}}]</h3> more points.
-                 {{ plot_div|indent(4)|safe }}
+                    {% if p_value < 0.05 %}
+                        We <font size=+2><b>reject</b></font> the null hypothesis that the mean score of these groups is the same.
+                    {% else %}
+                        We <font size=+2><b>fail to reject<b></font> the hypothesis that the mean score of these groups is the same.
+                    {% endif %}
+                    (p value: {{ p_value_formatted }})<BR>
+                    <BR>
+                    <BR>
+                    We can say with 95% confidence that the true mean effect of having {{test_label}} over {{control_label}} on your rack is <font size=+2><B>[{{ci_lower_formatted}}, {{ci_upper_formatted}}]</B></font> more points.
+                <td>
+                </tr></table>
             {% endif %}
         </form>
 

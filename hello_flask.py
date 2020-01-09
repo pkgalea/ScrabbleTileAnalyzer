@@ -20,7 +20,7 @@ app = Flask(__name__)
 def createFigure(control, test):
     control_hist, control_edges = np.histogram(control, density=True, bins=np.max(control))
     test_hist, test_edges = np.histogram(test, density=True, bins=np.max(test))
-    fig = figure(plot_width=800, plot_height=600, tools="pan,wheel_zoom,box_zoom,reset", x_range=(-10, 120))
+    fig = figure(plot_width=600, plot_height=400, tools="pan,wheel_zoom,box_zoom,reset", x_range=(-10, 120))
     fig.quad(top=control_hist, bottom=0, left=control_edges[:-1], right=control_edges[1:],
            fill_color="navy", line_color="white", alpha=0.5)
     fig.quad(top=test_hist, bottom=0, left=test_edges[:-1], right=test_edges[1:],
@@ -28,10 +28,6 @@ def createFigure(control, test):
     fig.xaxis.axis_label = 'score'
     fig.yaxis.axis_label = 'Density' 
     vline = Span(location=30, dimension='height', line_color='red', line_width=3)
-    print (np.min(control))
-    print (np.min(test))
-    print (control_edges)
-    print (test_edges)
     fig.renderers.extend([vline])
     return fig
 
@@ -54,15 +50,19 @@ def hello(rack_eval=None):
     # render template
     script, div = components(fig)
 
- 
-    title = "Q vs. Q"
+    if (rack_eval.p_value >= 0.001):
+        p_value_formatted = "{0:.2f}".format(rack_eval.p_value)
+    else:
+        p_value_formatted = "{0:.2E}".format(rack_eval.p_value)
+    ci_lower_formatted = "{0:.3f}".format(rack_eval.ci_lower)
+    ci_upper_formatted = "{0:.3f}".format(rack_eval.ci_upper)
+
     return render_template('index.html',
         has_data = True,
         plot_script=script,
         plot_div=div,
         js_resources=js_resources,
         css_resources=css_resources, 
-        title=title, 
         compares = compares, 
         alphabet =alphabet,
         control_label = rack_eval.control_label,   
@@ -71,17 +71,25 @@ def hello(rack_eval=None):
         test_n = rack_eval.test_n,
         control_y_bar = rack_eval.control_y_bar,
         test_y_bar = rack_eval.test_y_bar,
-        ci_lower = rack_eval.ci_lower,
-        ci_upper = rack_eval.ci_upper,
-        p_value = rack_eval.p_value)
+        p_value = rack_eval.p_value,
+        p_value_formatted = p_value_formatted,
+        ci_lower_formatted = ci_lower_formatted,
+        ci_upper_formatted = ci_upper_formatted
+       
+        )
 
 @app.route('/results', methods=['POST'])
 def results():
-    letter = request.form['DDLetter']
-    count = int(request.form['DDCount'])
-    compare = request.form['DDCompare']
+    letterC = request.form['DDLetterC']
+    countC = int(request.form['DDCountC'])
+    compareC = request.form['DDCompareC']
 
-    rack_eval = RackEvaluator([TileCondition(letter, count, compare)])
+    letterT = request.form['DDLetterT']
+    countT = int(request.form['DDCountT'])
+    compareT = request.form['DDCompareT']
+
+
+    rack_eval = RackEvaluator([TileCondition(letterC, countC, compareC)], [TileCondition(letterT, countT, compareT)])
     if rack_eval.evaluate():           
         return hello(rack_eval)
     return hello("no")
