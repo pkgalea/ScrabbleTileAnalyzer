@@ -1,7 +1,4 @@
 from pymongo import MongoClient
-import pprint
-
-import pandas as pd
 
 # Requests sends and recieves HTTP requests.
 import requests

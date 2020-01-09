@@ -4,17 +4,54 @@ from bs4 import BeautifulSoup
 import bs4
 import time
 
+
 class CrossTablesDownloader:
+    """ 
+    __init__ 
+  
+    Connects to MongoDB and gets the scrabble collections
+  
+    Parameters: 
+    none
+  
+    Returns: 
+    none
+  
+    """
     def __init__(self):
-        
         client = MongoClient("mongodb://localhost:27017/")
         self._scrabble_db = client[ "scrabble" ]
         self._pages_collection = self._scrabble_db[ "pages_collection" ]
         self._fgames_collection = self._scrabble_db[ "fgames_collection"]
 
+    """ 
+     
+  
+    Extended description of function. 
+  
+    Parameters: 
+    arg1 (int): Description of arg1 
+  
+    Returns: 
+    int: Description of return value 
+  
+    """
     def get_player_name_and_id(self,link):
         return link.text, link['href'].split("p=")[1]
 
+
+    """ 
+    If the players aren't hyperlinked, get just the player names
+
+    Splits the string on ' vs. '
+  
+    Parameters: 
+    player_names: a string of the player's names
+  
+    Returns: 
+    p1_name, p2_name: two strings of each player's name
+  
+    """
     def get_non_linked_player_names(self, player_names):
         players_split = player_names.split(" vs. ")
         if (len(players_split)==1):
@@ -25,6 +62,20 @@ class CrossTablesDownloader:
             p2_name = players_split[1].rstrip()
         return p1_name, p2_name
 
+    """ 
+    Get's player names and ids if only one is hyperlinked
+  
+    returns both player's names.
+    Looks to see which player is hyperlinked and gets that id as well.
+  
+    Parameters: 
+    player_names: A string of the players (one is hyperlinked)
+    
+    Returns: 
+    p1_name, p1_id, p2_name, p2_id
+    
+  
+    """
     def handle_single_linked_player(self, players, p1_name, p1_id):
         player_split = players.text.split(' vs. ')
         if player_split[0]==p1_name:
@@ -130,4 +181,3 @@ class CrossTablesDownloader:
 if __name__ == "__main__":
     ctd = CrossTablesDownloader()
     ctd.download_games()
-#ctd.add_lexicon()
