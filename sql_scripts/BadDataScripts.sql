@@ -1,6 +1,6 @@
+""" These are sql scipts used to remove games that have errors or aren't real games """
 
 /* games I've determined to be bad by inspection */
-
 insert into bad_games select 358;
 insert into bad_games select  394;
 insert into bad_games select  1079; 
@@ -43,7 +43,6 @@ insert into bad_games select distinct gamenum from game where gamenum not in (se
 insert into bad_games select distinct gamenum from game where gamenum not in (select distinct gamenum from turn where p2_score > 0)
 
 
-
 /* games where final score is 0 */
 insert into bad_games SELECT gamenum from game where p2_final_score=0 and gamenum not in (Select * from bad_games)
 
@@ -56,12 +55,8 @@ group by gamenum
 )  as bozo where len_game < 85
 
 
-
-
 /* remove games with weird negative scores */
 insert into bad_games Select distinct gamenum from turn where turn_score < 0 and NOT is_challenge  and gamenum not in (SELECT * from bad_games)
-
-
 
 
 /* weird 0s at the end of games */ 

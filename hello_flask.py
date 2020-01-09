@@ -1,6 +1,6 @@
 from flask import Flask, escape, request, render_template
 
-from RackEvaluator import RackEvaluator, TileCondition
+from src.RackEvaluator import RackEvaluator, TileCondition
 
 from bokeh.embed import components
 from bokeh.plotting import figure
