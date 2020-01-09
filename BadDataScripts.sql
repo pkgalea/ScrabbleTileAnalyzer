@@ -59,7 +59,7 @@ group by gamenum
 
 
 /* remove games with weird negative scores */
-insert into bad_games Select distinct gamenum from turn where turn_score < 0 and NOT is_challenge and not is_exchange and gamenum not in (SELECT * from bad_games)
+insert into bad_games Select distinct gamenum from turn where turn_score < 0 and NOT is_challenge  and gamenum not in (SELECT * from bad_games)
 
 
 
