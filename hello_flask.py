@@ -7,6 +7,7 @@ from bokeh.plotting import figure
 from bokeh.resources import INLINE
 from bokeh.util.string import encode_utf8
 from bokeh.models import Span
+
 from collections import Counter
 
 
@@ -27,6 +28,9 @@ def createFigure(control, test):
         fill_color="red", line_color="white", alpha=0.5)
     fig.xaxis.axis_label = 'score'
     fig.yaxis.axis_label = 'Density' 
+    fig.legend.location = "top_right"
+    fig.legend.click_policy="hide"
+ 
     vline = Span(location=30, dimension='height', line_color='red', line_width=3)
     fig.renderers.extend([vline])
     return fig
