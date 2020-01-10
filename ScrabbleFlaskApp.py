@@ -45,7 +45,7 @@ def hello(rack_eval=None):
     
     if (not rack_eval):
         return render_template('index.html', has_data=False, bad_data=False, compares = compares, alphabet = alphabet)
-    if (rack_eval.control_n < 40 or rack_eval.test_n < 40):
+    if (not rack_eval.control_n or not rack_eval.test_n or rack_eval.control_n < 40 or rack_eval.test_n < 40):
         return render_template('index.html', bad_data = True, has_data=False, compares = compares, alphabet = alphabet)
 
     fig = createFigure(rack_eval.control_y, rack_eval.test_y, rack_eval.control_label, rack_eval.test_label)
