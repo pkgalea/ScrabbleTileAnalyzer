@@ -108,6 +108,17 @@ class RackEvaluator:
         conn.close()
         return control, test
 
+    def calculate_confidence_interval(self, control, test):
+        control_var = np.var(control["turn_score"])
+        test_var = np.var(test["turn_score"])
+        df=self.control_n + self.test_n - 2
+        pooled_std_dev = math.sqrt( ((self.control_n-1)*control_var + (self.test_n-1)*test_var)/df)
+        std_err = pooled_std_dev * math.sqrt(1/self.control_n + 1/self.test_n)
+ 
+        MoE = stats.norm.ppf(0.975) * std_err 
+        self.ci_lower = self.mean_diff - MoE
+        self.ci_upper = self.mean_diff + MoE
+
 
     def evaluate(self):
 
@@ -127,21 +138,13 @@ class RackEvaluator:
         self.control_n = control.shape[0]
         self.test_n = test.shape[0]
         self.p_value = stats.ttest_ind(control.turn_score, test.turn_score, equal_var=False).pvalue
-
-        control_var = np.var(control["turn_score"])
-        test_var = np.var(test["turn_score"])
         self.mean_diff = self.test_y_bar - self.control_y_bar
-        df=self.control_n + self.test_n - 2
-        pooled_std_dev = math.sqrt( ((self.control_n-1)*control_var + (self.test_n-1)*test_var)/df)
-        std_err = pooled_std_dev * math.sqrt(1/self.control_n + 1/self.test_n)
- 
-        MoE = stats.norm.ppf(0.975) * std_err 
-        self.ci_lower = self.mean_diff - MoE
-        self.ci_upper = self.mean_diff + MoE
+
+        self.calculate_confidence_interval(control, test)
 
         return True  
 
 if __name__ == "__main__":
-    re = RackEvaluator([TileCondition('A', 1, "<")])
+    re = RackEvaluator([TileCondition('A', 1, "<")], [TileCondition('A', 1, "<")])
     re.evaluate()
         

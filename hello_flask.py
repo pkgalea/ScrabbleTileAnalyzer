@@ -1,17 +1,11 @@
 from flask import Flask, escape, request, render_template
-
 from src.RackEvaluator import RackEvaluator, TileCondition
-
 from bokeh.embed import components
 from bokeh.plotting import figure
 from bokeh.resources import INLINE
 from bokeh.util.string import encode_utf8
 from bokeh.models import Span
-
 from collections import Counter
-
-
-
 import numpy as np
 
 app = Flask(__name__)
@@ -19,23 +13,28 @@ app = Flask(__name__)
 
 
 def createFigure(control, test, control_label, test_label):
+
     control_hist, control_edges = np.histogram(control, density=True, bins=np.max(control))
     test_hist, test_edges = np.histogram(test, density=True, bins=np.max(test))
+ 
     fig = figure(plot_width=600, plot_height=400, tools="pan,wheel_zoom,box_zoom,reset", x_range=(-10, 120))
     fig.quad(top=control_hist, bottom=0, left=control_edges[:-1], right=control_edges[1:],
            fill_color="navy", line_color="white", alpha=0.5, legend="Control: " + control_label)
     fig.quad(top=test_hist, bottom=0, left=test_edges[:-1], right=test_edges[1:],
         fill_color="red", line_color="white", alpha=0.5, legend="Test: " + test_label)
- #   vline = Span(location=30, dimension='height', line_color='red', line_width=3)
+    max_y = max([np.max(test_hist), np.max(control_hist)])
+    fig.line([np.mean(control), np.mean(control)], [0, max_y], legend="Control mean ({0:.2f})".format(np.mean(control)),line_dash=[4, 4], color="navy", line_width=3)
+    fig.line([np.mean(test), np.mean(test)], [0, max_y], legend="Test mean ({0:.2f})".format(np.mean(test)),line_dash=[4, 4], color="red", line_width=3)
     fig.xaxis.axis_label = 'Turn Score'
     fig.yaxis.axis_label = 'Density' 
     fig.legend.location = "top_right"
     fig.legend.click_policy="hide"
     fig.xaxis.axis_label_text_font_size = '15pt'
     fig.yaxis.axis_label_text_font_size = '15pt'
- 
-  #  fig.renderers.extend([vline])
+    fig.title.text = "Turn Scores for Control and Test Groups"
+    fig.title.text_font_size = "25px"
     return fig
+ 
 
 
 @app.route('/')

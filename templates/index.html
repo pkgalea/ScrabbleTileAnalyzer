@@ -18,7 +18,7 @@
                 Not enough data to run a statistical test.  Please <a href="\">try again.</a><br><br>
             {% endif %}
             {% if not has_data %}
-            Compare a rack with 
+            Compare average turn score for a rack with 
 
                 <select name="DDCompareC" width="300px">
                     {% for c in compares %}
@@ -90,8 +90,7 @@
                 </td>   </tr>
             </tr>    
                 
-                <td align=center>Scrabble Scores for Control and Test Group.<br>
-                        Click on legend to hide 1 distribution.<br>
+                <td align=center>
                         {{ plot_div|indent(4)|safe }}</td>
                 </tr></table>
                     <table width=800><tr></td>
@@ -101,7 +100,7 @@
                             <td>
                                 Because our sample size is so large, we invoke the central limit theorem and use a two sample z-test to compare means.<BR>
                                 H0 = The mean of the two populations is the same.<BR>
-                                H1 = The mean of the two populations is not the same.<BR>
+                                Ha = The mean of the two populations is not the same.<BR>
                             </td></tr>
                             <tr><td valign=top>
                                 <font size=+2><b>Conclusions:</b></font>
