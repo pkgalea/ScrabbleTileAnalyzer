@@ -1,12 +1,10 @@
 import psycopg2 as pg2
 import pandas as pd
 
-import matplotlib.pyplot as plt
 import numpy as np
 from scipy import stats
 import math
 
-plt.style.use('ggplot')
 
 
 class TileCondition:
@@ -14,6 +12,18 @@ class TileCondition:
         self._letter = letter
         self._count = count
         self._compare = compare
+
+    """ 
+    Returns the appropriate lambda function for this condition
+  
+  
+    Parameters: 
+    None
+    
+    Returns: 
+    lambda function that represents this condition
+
+    """
     def get_lambda(self):
         if (self._compare=="=="):
             return lambda x: x.count(self._letter)== self._count
@@ -23,7 +33,18 @@ class TileCondition:
             return lambda x: x.count(self._letter) <= self._count
         if (self._compare=="!="):
             return lambda x: x.count(self._letter) != self._count        
-        
+
+    """ 
+    Returns a nicely formatted description string for this condition
+  
+  
+    Parameters: 
+    None
+    
+    Returns: 
+     Returns a nicely formatted description string for this condition
+
+    """        
     def get_label(self):
         if (self._compare=="=="):
             return "Exactly {:} {:}'s".format(self._count, self._letter)
@@ -55,7 +76,17 @@ class RackEvaluator:
         self.p_value = None
     
 
-
+    """ 
+    Gets the Data to be analyzed, divided in control and test groups
+  
+    Parameters: 
+    None
+    
+    Returns: 
+    control - Pandas DataFrame of the control group
+    test - Pandas DataFrame of the test group
+     
+    """    
     def get_data(self):
         conn = pg2.connect(user='postgres',  dbname='scrabble', host='localhost', port='5432', password='myPassword')
 
@@ -107,9 +138,6 @@ class RackEvaluator:
         MoE = stats.norm.ppf(0.975) * std_err 
         self.ci_lower = self.mean_diff - MoE
         self.ci_upper = self.mean_diff + MoE
-
- 
-
 
         return True  
 

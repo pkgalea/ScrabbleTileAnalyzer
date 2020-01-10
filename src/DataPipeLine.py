@@ -73,8 +73,7 @@ class CrossTablesDownloader:
     
     Returns: 
     p1_name, p1_id, p2_name, p2_id
-    
-  
+
     """
     def handle_single_linked_player(self, players, p1_name, p1_id):
         player_split = players.text.split(' vs. ')
