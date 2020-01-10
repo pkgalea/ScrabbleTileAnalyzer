@@ -42,13 +42,19 @@ To fill in later.
 
 Counfounding factors include: Player Rating, Turn Number, Dictionary, Board Layout.
 
-![confounders](http://github.com/pkgalea/scrabble/images/confounders.png)
+![confounders](https://github.com/pkgalea/scrabble/blob/master/images/confounders.png)
+
+One confounding factor is player ranking.  Not too surprisingly, higher ranked players have higher turn scores.  It might be tempting to think that this won't matter because the tiles are chosen randomly.  However, better players tend to play longer words, so they get more tiles.  And therefore, they'll have a higher chance of having a given tile.  So it would be interesting to control for rank in the experiment.
+
+Another counfounding factor is turn number.  You can see that the first few turns tend to score less.  This is liekly due to the lack of bonus squares in the beginning of the game and also that player's "build their rack".  That is, they keep good tiles on their rack to score higher later.  This would also be interesting to control.
+
+Yet another counfounding factor is the dictionary used.  Hasbro recently added "QI" and "ZA" to the dictionarly, allowing for high scoring two-letter Q and Z words.  The effect of the dictionary should be considered.
 
 
 
 # Data
 
-Data was scraped from https://www.cross-tables.com/annolistself.php  It consisted of 36K games and 800K turns.  Incomplete games and fake games were removed.
+Data was scraped from https://www.cross-tables.com/annolistself.php  It consisted of 36K games and 800K turns.  Incomplete games and fake games were removed.  Also, I only consider turns there are 7 letters on the rack and the rack is visible.  This limited the analysis to 360K records.
 
 # Future Analysis
 
@@ -66,7 +72,6 @@ Thanks to Joseph Gartner, Dan Rupp & Brent Goldberg for their help and guidance 
 
 
 # Web App
-
 
 http://3.14.64.250/
 
