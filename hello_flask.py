@@ -18,21 +18,23 @@ app = Flask(__name__)
 
 
 
-def createFigure(control, test):
+def createFigure(control, test, control_label, test_label):
     control_hist, control_edges = np.histogram(control, density=True, bins=np.max(control))
     test_hist, test_edges = np.histogram(test, density=True, bins=np.max(test))
     fig = figure(plot_width=600, plot_height=400, tools="pan,wheel_zoom,box_zoom,reset", x_range=(-10, 120))
     fig.quad(top=control_hist, bottom=0, left=control_edges[:-1], right=control_edges[1:],
-           fill_color="navy", line_color="white", alpha=0.5)
+           fill_color="navy", line_color="white", alpha=0.5, legend="Control: " + control_label)
     fig.quad(top=test_hist, bottom=0, left=test_edges[:-1], right=test_edges[1:],
-        fill_color="red", line_color="white", alpha=0.5)
-    fig.xaxis.axis_label = 'score'
+        fill_color="red", line_color="white", alpha=0.5, legend="Test: " + test_label)
+ #   vline = Span(location=30, dimension='height', line_color='red', line_width=3)
+    fig.xaxis.axis_label = 'Turn Score'
     fig.yaxis.axis_label = 'Density' 
     fig.legend.location = "top_right"
     fig.legend.click_policy="hide"
+    fig.xaxis.axis_label_text_font_size = '15pt'
+    fig.yaxis.axis_label_text_font_size = '15pt'
  
-    vline = Span(location=30, dimension='height', line_color='red', line_width=3)
-    fig.renderers.extend([vline])
+  #  fig.renderers.extend([vline])
     return fig
 
 
@@ -41,11 +43,13 @@ def hello(rack_eval=None):
 
     compares = [("exactly","=="), ("at least", ">="), ("at most", "<=")]
     alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','?']
-
+    
     if (not rack_eval):
-        return render_template('index.html', has_data=False, compares = compares, alphabet = alphabet)
+        return render_template('index.html', has_data=False, bad_data=False, compares = compares, alphabet = alphabet)
+    if (rack_eval.control_n < 40 or rack_eval.test_n < 40):
+        return render_template('index.html', bad_data = True, has_data=False, compares = compares, alphabet = alphabet)
 
-    fig = createFigure(rack_eval.control_y, rack_eval.test_y)
+    fig = createFigure(rack_eval.control_y, rack_eval.test_y, rack_eval.control_label, rack_eval.test_label)
      
     # grab the static resources
     js_resources = INLINE.render_js()
@@ -58,11 +62,13 @@ def hello(rack_eval=None):
         p_value_formatted = "{0:.2f}".format(rack_eval.p_value)
     else:
         p_value_formatted = "{0:.2E}".format(rack_eval.p_value)
-    ci_lower_formatted = "{0:.3f}".format(rack_eval.ci_lower)
-    ci_upper_formatted = "{0:.3f}".format(rack_eval.ci_upper)
+    ci_lower_formatted = "{0:.2f}".format(rack_eval.ci_lower)
+    ci_upper_formatted = "{0:.2f}".format(rack_eval.ci_upper)
+    mean_diff_formatted = "{0:.2f}".format(rack_eval.mean_diff)
 
     return render_template('index.html',
         has_data = True,
+        bad_data = False, 
         plot_script=script,
         plot_div=div,
         js_resources=js_resources,
@@ -78,7 +84,8 @@ def hello(rack_eval=None):
         p_value = rack_eval.p_value,
         p_value_formatted = p_value_formatted,
         ci_lower_formatted = ci_lower_formatted,
-        ci_upper_formatted = ci_upper_formatted
+        ci_upper_formatted = ci_upper_formatted,
+        mean_diff = mean_diff_formatted
        
         )
 

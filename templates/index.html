@@ -14,6 +14,9 @@
         <h1>Scrabble Tile Comparison</h1>
 
         <form action="{{ url_for('results') }}" method="post">
+            {% if bad_data %}
+                Not enough data to run a statistical test.  Please <a href="\">try again.</a><br><br>
+            {% endif %}
             {% if not has_data %}
             Compare a rack with 
 
@@ -70,10 +73,8 @@
                 <BR>
                         <input class="button1" type="submit" value="GO!">
             {% else %}
-                <a href="/">Run Another Test</a>
+                <div align=left><a href="/">Run Another Test</a></div>
             {% endif %}
-            <BR>
-            <BR>
             {% if has_data %}
                 <table width=800><tr><td align=left>
                 <h2> Data: </h2>
@@ -84,30 +85,37 @@
                    <tr><td>&nbsp;</td><td align="center"> <B>Control Group<br>{{control_label | safe}}</B></td><td align="center"> <B>Test Group<br>{{test_label | safe}}</B></td align="center"></tr>
                    <tr><td align="right">Sample size:</td><td align="center">{{control_n}}</td align="center"><td align="center"> {{test_n}} </td align="center"></tr>
                    <tr><td  align="right">Sample mean:</td><td align="center"><b>{{control_y_bar}}</b></td align="center"><td align="center"><b> {{test_y_bar}}</b> </td align="center"></tr>
-                   </table>
+                   <tr><td  colspan=3 align="left">Difference of means: <b>{{mean_diff}}</b></td ></tr>
+                    </table>
                 </td>   </tr>
             </tr>    
-                <td align=center>{{ plot_div|indent(4)|safe }}</td>
+                
+                <td align=center>Scrabble Scores for Control and Test Group.<br>
+                        Click on legend to hide 1 distribution.<br>
+                        {{ plot_div|indent(4)|safe }}</td>
                 </tr></table>
-                <table width=800><tr></td>
-                    <h2>Statistical Inference:</h2></td></tr>
-                    <tr><td width=50>&nbsp;&nbsp;&nbsp;</td w><td>
-                        <h3>Test:</h3>
-                    Because our sample size is so large, we invoke the central limit theorem and use a two sample z-test to compare means.<BR>
-                    H0 = The mean of the two populations is the same.<BR>
-                    H1 = The mean of the two populations is not the same.<BR>
-                    <BR>
-                    <h3>Result:</h3>
-
-                    {% if p_value < 0.05 %}
-                        We <font size=+2><b>reject</b></font> the null hypothesis that the mean score of these groups is the same.
-                    {% else %}
-                        We <font size=+2><b>fail to reject</b></font> the hypothesis that the mean score of these groups is the same.
-                    {% endif %}
-                    (p value: {{ p_value_formatted }})<BR>
-                    <BR>
-                    <BR>
-                    We can say with 95% confidence that the true mean effect of having {{test_label}} over {{control_label}} on your rack is <font size=+2><B>[{{ci_lower_formatted}}, {{ci_upper_formatted}}]</B></font> more points.
+                    <table width=800><tr></td>
+                        <h2>Statistical Inference:</h2></td></tr>
+                        <tr><td width=50>&nbsp;&nbsp;&nbsp;</td w><td>
+                            <table><tr><td valign="top"> <font size=+2><b>Test:</b></font></td>
+                            <td>
+                                Because our sample size is so large, we invoke the central limit theorem and use a two sample z-test to compare means.<BR>
+                                H0 = The mean of the two populations is the same.<BR>
+                                H1 = The mean of the two populations is not the same.<BR>
+                            </td></tr>
+                            <tr><td valign=top>
+                                <font size=+2><b>Conclusions:</b></font>
+                                </td><td>
+                                {% if p_value < 0.05 %}
+                                    We <font size=+2><b>reject</b></font> the null hypothesis that the mean score of these groups is the same.
+                                {% else %}
+                                    We <font size=+2><b>fail to reject</b></font> the hypothesis that the mean score of these groups is the same.
+                                {% endif %}
+                                (p value: {{ p_value_formatted }})<BR>
+                                <BR>
+        
+                                We can say with 95% confidence that the true mean effect of having {{test_label}} over {{control_label}} on your rack lies between <font size=+2><B>[{{ci_lower_formatted}}, {{ci_upper_formatted}}]</B></font> more points.
+                                </td></td></table>
                 <td>
                 </tr></table>
             {% endif %}
