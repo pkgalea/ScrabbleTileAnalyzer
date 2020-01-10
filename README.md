@@ -33,19 +33,22 @@ To Fill in later
 
 The tech stack consists of MongoDb, Beautiful Soup, Python 3, Numpy, Pandas, Matplotlib, HTML, Postgres SQL, Flask, Amazon EC2, SciPy, Ngnix and Docker.
 
-![alt text](http://github.com/pkgalea/scrabble/images/Screenshot from 2020-01-10 14-06-20.png)
-
-
-
-# Data
 
 The data was scraped from https://www.cross-tables.com/annolistself.php.  These are self uploaded, complete Scrabble games.  Many of these games come from major tournaments.  
+
 # Confounding Factors
 
 To fill in later.
 
 Counfounding factors include: Player Rating, Turn Number, Dictionary, Board Layout.
 
+![confounders](http://github.com/pkgalea/scrabble/images/confounders.png)
+
+
+
+# Data
+
+Data was scraped from https://www.cross-tables.com/annolistself.php  It consisted of 36K games and 800K turns.  Incomplete games and fake games were removed.
 
 # Future Analysis
 
