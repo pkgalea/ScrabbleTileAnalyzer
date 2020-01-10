@@ -33,8 +33,9 @@ To Fill in later
 
 The tech stack consists of MongoDb, Beautiful Soup, Python 3, Numpy, Pandas, Matplotlib, HTML, Postgres SQL, Flask, Amazon EC2, SciPy, Ngnix and Docker.
 
-![GitHub Logo](/images/Screenshot from 2020-01-10 14-06-20.png)
-Format: ![Alt Text](url)
+![alt text](http://github.com/pkgalea/scrabble/images/Screenshot from 2020-01-10 14-06-20.png)
+
+
 
 # Data
 
