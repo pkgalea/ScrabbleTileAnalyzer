@@ -11,15 +11,10 @@ There have been several studies looking at the value of a given Scrabble tile bu
 
 
 __Results:__
-Because the sample size is so large there were many of significant results.  Individual Z-tests for certain tiles can be found by running the flask App:  
-
-http://3.14.64.250/
+Because the sample size is so large there were many of significant results.  Individual Z-tests for certain tiles can be found by running the Flask App.  
 
 One example:  Racks with a Q were found to score between [4.41, 5.03] less points.
 
-
-
-See this work as a presentation in [Google Slides]
 ---
 
 # Background & Motivation
@@ -27,7 +22,14 @@ As an amateur scabble player I have an intuitive sense of the relative value of 
 
 # Hypotheses
 
-To Fill in later
+The hypothesis is that for any given two tiles, having one tile on the rack will result in a different mean score than having a different tile on the rack.
+
+Example.  
+Consider two groups:  Control - Racks with a Q on them.   Alternative - Racks with an F on them.
+
+
+H0:  The mean score of these
+          Ha:  The 
 
 # Analysis methods
 
@@ -73,5 +75,5 @@ Thanks to Joseph Gartner, Dan Rupp & Brent Goldberg for their help and guidance 
 
 # Web App
 
-http://3.14.64.250/
+Coming soon.
 
