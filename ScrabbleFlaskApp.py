@@ -3,7 +3,6 @@ from src.RackEvaluator import RackEvaluator, TileCondition
 from bokeh.embed import components
 from bokeh.plotting import figure
 from bokeh.resources import INLINE
-from bokeh.util.string import encode_utf8
 from bokeh.models import Span
 from collections import Counter
 import numpy as np
@@ -106,4 +105,4 @@ def results():
 
 
 if __name__ == "__main__":
-    app.run()
+    app.run(host='0.0.0.0')
