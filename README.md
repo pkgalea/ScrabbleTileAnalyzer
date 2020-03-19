@@ -9,7 +9,7 @@ An Investigation of how a specific tile on a Scrabble rack changes the score of 
 __Abstract:__
 There have been several studies looking at the value of a given Scrabble tile but these were all computer simulations.  This is an observational study from over 360,000 individual actual scrabble moves as uploaded to Cross-Tables.com.  The goal is answer the question "How many more (or less) points will a given tile lead to on a given turn of scrabble?".  I have built a flask app to allow users to explore this on their own.
 
-To explore this tool please see my flask app at: http://3.21.186.76:5000
+To explore this tool please see my flask app at: http://18.218.61.61:5000
 
 
 __Results:__
