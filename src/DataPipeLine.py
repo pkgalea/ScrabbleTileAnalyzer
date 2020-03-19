@@ -7,8 +7,6 @@ import time
 
 class CrossTablesDownloader:
     """ 
-    __init__ 
-  
     Connects to MongoDB and gets the scrabble collections
   
     Parameters: 
@@ -24,35 +22,35 @@ class CrossTablesDownloader:
         self._pages_collection = self._scrabble_db[ "pages_collection" ]
         self._fgames_collection = self._scrabble_db[ "fgames_collection"]
 
-    """ 
-     
-  
-    Extended description of function. 
-  
-    Parameters: 
-    arg1 (int): Description of arg1 
-  
-    Returns: 
-    int: Description of return value 
-  
-    """
+
     def get_player_name_and_id(self,link):
+        """ 
+        Extended description of function. 
+    
+        Parameters: 
+        arg1 (int): Description of arg1 
+    
+        Returns: 
+        int: Description of return value 
+    
+        """
         return link.text, link['href'].split("p=")[1]
 
 
-    """ 
-    If the players aren't hyperlinked, get just the player names
 
-    Splits the string on ' vs. '
-  
-    Parameters: 
-    player_names: a string of the player's names
-  
-    Returns: 
-    p1_name, p2_name: two strings of each player's name
-  
-    """
     def get_non_linked_player_names(self, player_names):
+        """ 
+        If the players aren't hyperlinked, get just the player names
+
+        Splits the string on ' vs. '
+    
+        Parameters: 
+        player_names: a string of the player's names
+    
+        Returns: 
+        p1_name, p2_name: two strings of each player's name
+    
+        """       
         players_split = player_names.split(" vs. ")
         if (len(players_split)==1):
             p1_name = ""
@@ -62,20 +60,21 @@ class CrossTablesDownloader:
             p2_name = players_split[1].rstrip()
         return p1_name, p2_name
 
-    """ 
-    Get's player names and ids if only one is hyperlinked
-  
-    returns both player's names.
-    Looks to see which player is hyperlinked and gets that id as well.
-  
-    Parameters: 
-    player_names: A string of the players (one is hyperlinked)
-    
-    Returns: 
-    p1_name, p1_id, p2_name, p2_id
-
-    """
+ 
     def handle_single_linked_player(self, players, p1_name, p1_id):
+        """ 
+        Get's player names and ids if only one is hyperlinked
+    
+        returns both player's names.
+        Looks to see which player is hyperlinked and gets that id as well.
+    
+        Parameters: 
+        player_names: A string of the players (one is hyperlinked)
+        
+        Returns: 
+        p1_name, p1_id, p2_name, p2_id
+
+        """
         player_split = players.text.split(' vs. ')
         if player_split[0]==p1_name:
             p2_name = player_split[1].split("\n")[0].rstrip()
@@ -97,6 +96,17 @@ class CrossTablesDownloader:
         return p1_name, p1_id, p2_name, p2_id
 
     def get_game_info(self, game):
+        """ 
+        Gets high level game info from the beautiful soup object of a game (e.g. player names, lexicon)
+        returns game id, lexicon, player 1 id, player 1 name, player 2 id, player 2 name
+        
+        Parameters: 
+        game(beautiful soup object): A single row of game data from the list of game pages 
+        
+        Returns: 
+        str, str, str, str, str, str: gameid, lexicon, p1_id, p1_name, P2_id, p2_name
+
+        """
         p1_id = p2_id = "-1"
         p1_name = p2_name = ""
         gameid = game.find('a')['href'].split("u=")[1]
@@ -117,6 +127,20 @@ class CrossTablesDownloader:
 
 
     def add_game_to_collection(self, gameid, lexicon, p1_id, p1_name, p2_id, p2_name):
+        """ 
+        Downloads a full game page from the pages collecion and inserts it into fgames collection in mongodb.
+
+        Parameters: 
+        gameid (str): The cross tables id of the game
+        lexicon (str):  The dictionary used for the game
+        p1_id (str): The id of the 1st player
+        p1_name (str): The name of the 1st player
+        p2_id (str): The id of the 2nd player
+        p2_name (str): The name of the 2nd player
+        
+        Returns: 
+        bool: if the game was successfully 
+        """
         if (self._fgames_collection.find({'game_num': gameid}).count() != 0):
             return False
         else:
@@ -136,33 +160,42 @@ class CrossTablesDownloader:
                     logf.write("Failed to download {0}\n".format(gameid))
         return True
 
-    def get_list_of_games_page(self, page_index):
-           url = "https://www.cross-tables.com/annolistself.php?offset=" + str(page_index)
-           r = requests.get(url, headers={"User-Agent": "XY"})
-           print(page_index, r.status_code)
-           if (r.status_code==200):
-               pass
+    def get_list_of_games_page(self, page_index=1):
+        """ 
+        Downloads raw game pages from cross-tables.  Parses those pages and stores them as mongo database.
+
+        Parameters: page_index:  The index of the page to start downloading from.
+        
+        Returns: 
+        request: The result of the requests.get of the entire list of pages.
+        """
+        url = "https://www.cross-tables.com/annolistself.php?offset=" + str(page_index)
+        r = requests.get(url, headers={"User-Agent": "XY"})
+        print(page_index, r.status_code)
+        if (r.status_code==200):
+            pass
 #                new_pages_collection.insert_one({"page_num": i, "content": r.text})
-           else:
-                print ("error", page_index)
-                return None
-           return r
+        else:
+            print ("error", page_index)
+            return None
+        return r
     
     def download_games(self):
+        """ 
+        Downloads raw game pages from cross-tables.  Parses those pages and stores them as mongo database.
+
+        Parameters: None
+        
+        Returns: None
+        """
         c = 0
         all_games_found = False
         page_index = 1
         while not all_games_found:
-#        games_collection = scrabble_db[ "games_collection" ]
-#        for p in self._pages_collection.find({'page_num': {"$gt": 0}}):  #({'page_num':15501}):
- 
             r = self.get_list_of_games_page(page_index)
 
             print(c)
             c+=1
-        #    print(p['content'])
-  #          page_num = p['page_num']
-  #          print (page_num)
             soup = BeautifulSoup(r.content, 'html.parser')
             for i in range (1, 101):
                 game = soup.find(id="row"+str(i))
@@ -176,7 +209,6 @@ class CrossTablesDownloader:
 
                              
                     
-                
 if __name__ == "__main__":
     ctd = CrossTablesDownloader()
     ctd.download_games()
