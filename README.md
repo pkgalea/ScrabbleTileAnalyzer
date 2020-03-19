@@ -58,8 +58,13 @@ Another counfounding factor is turn number.  You can see that the first few turn
 
 Yet another counfounding factor is the dictionary used.  Hasbro recently added "QI" and "ZA" to the dictionarly, allowing for high scoring two-letter Q and Z words.  The effect of the dictionary should be considered.
 
-
 # Flask App
+
+I developed a flask app to allow users to run this analysis.   
+
+![ui](https://github.com/pkgalea/scrabble/blob/master/images/ui.png)
+![graph](https://github.com/pkgalea/scrabble/blob/master/images/graph.png)
+![results](https://github.com/pkgalea/scrabble/blob/master/images/results.png)
 
 
 
